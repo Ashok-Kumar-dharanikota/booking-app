@@ -4,6 +4,33 @@ A React Native mobile application built with **Expo SDK 58**, **Expo Router**, a
 
 ---
 
+## Visual Overview & Baseline Screens
+
+For complete functional and interaction documentation, see [App-flow.md](App-flow.md).
+
+### 1. Booking List & Search Flows
+
+| Booking List Screen | Search Filtered (`rev`) | No Match State (`revxyz`) |
+|:---:|:---:|:---:|
+| ![Booking List Screen](docs/screenshots/baseline/booking-list.png) | ![Search Filtered](docs/screenshots/baseline/booking-search-results.png) | ![No Match State](docs/screenshots/baseline/booking-search-no-match.png) |
+| *Home list showing scheduled bookings, search field, and last updated time.* | *Debounced search for `rev` returning only `Plan review`.* | *Search query with no matches showing empty state feedback.* |
+
+### 2. Timezone Conversion Across Geographies
+
+| Studio Visit (New York) | Site Walkthrough (Los Angeles) | Plan Review (London) |
+|:---:|:---:|:---:|
+| ![Studio Visit](docs/screenshots/baseline/booking-detail-studio.png) | ![Site Walkthrough](docs/screenshots/baseline/booking-detail-site.png) | ![Plan Review](docs/screenshots/baseline/booking-detail-review.png) |
+| *15:00 UTC converted to **11:00 AM EDT** (`America/New_York`).* | *18:00 UTC converted to **11:00 AM PDT** (`America/Los_Angeles`).* | *14:00 UTC converted to **3:00 PM BST** (`Europe/London`).* |
+
+### 3. Check-In & Local Note Persistence
+
+| Empty Note Validation | Note Saved Confirmation | Note Restored on Re-entry |
+|:---:|:---:|:---:|
+| ![Empty Note Validation](docs/screenshots/baseline/note-empty-validation.png) | ![Note Saved](docs/screenshots/baseline/note-saved.png) | ![Note Restored](docs/screenshots/baseline/note-restored.png) |
+| *Saving empty note triggers validation error: `Enter a note`.* | *Valid note written to AsyncStorage with `Note saved` feedback.* | *Navigating back and re-opening booking restores note from local storage.* |
+
+---
+
 ## Features
 
 - **Booking List (`/`)**:
@@ -149,7 +176,7 @@ You can launch the app with custom environment variables:
 Agentic testing was performed live on an Android emulator (`emulator-5554`, SDK 37) via Argent:
 - **Search Filtering**: Typed `rev` into `Search bookings` -> verified UI tree displays only `Plan review`.
 - **Search Empty State**: Typed `revxyz` -> verified UI tree displays `No bookings match`.
-- **Timezone Conversion**: Opened `Studio visit` -> verified calendar date `1 June 2026`, local time `11:00 AM`, timezone `America/New_York`.
+- **Timezone Conversion**: Opened `Studio visit`, `Site walkthrough`, and `Plan review` -> verified calendar date `1 June 2026`, local times `11:00 AM EDT`, `11:00 AM PDT`, and `3:00 PM BST`.
 - **Empty Note Validation**: Tapped `Save note` with empty field -> verified `Enter a note` error message.
 - **Note Persistence**: Typed `Meet with client at studio reception`, tapped `Save note` -> verified `Note saved`. Navigated back to list and re-entered detail screen -> verified saved note was restored from AsyncStorage.
 - **Check-in Interaction**: Tapped `Check in` -> verified button updated to `Checked in`.
