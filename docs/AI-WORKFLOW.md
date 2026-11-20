@@ -1,6 +1,6 @@
 # Master AI Workflow Dashboard
 
-**Current Phase:** Phase 3: Booking List Screen (`/`) with Search & Refresh (Completed)  
+**Current Phase:** Phase 3: Booking List Screen (`/`) with Search & Refresh (Completed & Polished)  
 **Current Objective:** Implement the booking list screen with case-insensitive search, pull-to-refresh, status handling, and navigation.
 
 ---
@@ -22,7 +22,10 @@
 ## Completed Tasks for Phase 3
 
 - [x] Implement case-insensitive title search function `filterBookings` in `src/lib/filter.ts`.
-- [x] Write and pass unit tests for search filtering in `src/lib/filter.test.ts`.
+- [x] Implement 300ms search debouncing.
+- [x] Enforce filter initiation only when at least 3 characters are typed.
+- [x] Fix keyboard dismissal by extracting search header outside virtualized list.
+- [x] Write and pass unit tests in `src/lib/filter.test.ts` (5 tests).
 - [x] Implement `src/app/index.tsx` with:
   - `Search bookings` text input and label.
   - Pull-to-refresh with changing `Updated` timestamp.
@@ -32,13 +35,13 @@
   - Safe area container.
   - Navigation to `/bookings/[id]`.
 - [x] Verify static analysis: `npx tsc --noEmit` and `npx expo lint`.
-- [x] Commit Phase 3 to Git repository.
+- [x] Commit Phase 3 and bug fixes to Git repository.
 
 ---
 
 ## Outstanding Issues & Decisions
 
-None. All 13 unit tests passing, zero lint warnings, and zero TypeScript errors.
+None. All 14 unit tests passing, zero lint warnings, and zero TypeScript errors.
 
 ---
 

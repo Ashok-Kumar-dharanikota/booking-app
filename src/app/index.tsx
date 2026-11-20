@@ -26,7 +26,19 @@ export default function BookingListScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedQuery, setDebouncedQuery] = useState<string>('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  // Debounce search query input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -79,7 +91,7 @@ export default function BookingListScreen() {
     setLoading(false);
   }, [fetchData]);
 
-  const filteredBookings = filterBookings(bookings, searchQuery);
+  const filteredBookings = filterBookings(bookings, debouncedQuery);
 
   const dynamicStyles = {
     container: {
@@ -107,33 +119,6 @@ export default function BookingListScreen() {
       color: isDark ? '#93C5FD' : '#2563EB',
     },
   };
-
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <View style={styles.searchSection}>
-        <Text style={[styles.fieldLabel, dynamicStyles.text]}>Search bookings</Text>
-        <TextInput
-          style={[styles.searchInput, dynamicStyles.input]}
-          placeholder="Search bookings"
-          placeholderTextColor={isDark ? '#777777' : '#9CA3AF'}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-          clearButtonMode="while-editing"
-          accessibilityLabel="Search bookings"
-        />
-      </View>
-
-      {lastUpdated && (
-        <View style={styles.updatedContainer}>
-          <Text style={[styles.updatedLabel, dynamicStyles.subtext]}>
-            Updated: {lastUpdated.toLocaleTimeString()}
-          </Text>
-        </View>
-      )}
-    </View>
-  );
 
   if (loading && !refreshing) {
     return (
@@ -165,10 +150,36 @@ export default function BookingListScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, dynamicStyles.container]} edges={['top', 'left', 'right']}>
+      {/* Search Header placed outside FlatList so TextInput never unmounts or loses keyboard focus on typing */}
+      <View style={styles.headerContainer}>
+        <View style={styles.searchSection}>
+          <Text style={[styles.fieldLabel, dynamicStyles.text]}>Search bookings</Text>
+          <TextInput
+            style={[styles.searchInput, dynamicStyles.input]}
+            placeholder="Search bookings"
+            placeholderTextColor={isDark ? '#777777' : '#9CA3AF'}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+            accessibilityLabel="Search bookings"
+          />
+        </View>
+
+        {lastUpdated && (
+          <View style={styles.updatedContainer}>
+            <Text style={[styles.updatedLabel, dynamicStyles.subtext]}>
+              Updated: {lastUpdated.toLocaleTimeString()}
+            </Text>
+          </View>
+        )}
+      </View>
+
       <FlatList
         data={filteredBookings}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -221,17 +232,13 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-    flexGrow: 1,
-  },
   headerContainer: {
+    paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   searchSection: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   fieldLabel: {
     fontSize: 14,
@@ -252,6 +259,11 @@ const styles = StyleSheet.create({
   },
   updatedLabel: {
     fontSize: 12,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+    flexGrow: 1,
   },
   centerContainer: {
     flex: 1,

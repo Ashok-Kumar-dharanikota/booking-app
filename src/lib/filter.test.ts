@@ -24,12 +24,18 @@ describe('filterBookings', () => {
     },
   ];
 
-  it('returns all bookings when query is empty', () => {
+  it('returns all bookings when query is empty or whitespace', () => {
     expect(filterBookings(sampleBookings, '')).toEqual(sampleBookings);
     expect(filterBookings(sampleBookings, '   ')).toEqual(sampleBookings);
   });
 
-  it('filters titles case-insensitively', () => {
+  it('does not filter and returns all bookings when fewer than 3 characters are entered', () => {
+    expect(filterBookings(sampleBookings, 'r')).toEqual(sampleBookings);
+    expect(filterBookings(sampleBookings, 're')).toEqual(sampleBookings);
+    expect(filterBookings(sampleBookings, '  re ')).toEqual(sampleBookings);
+  });
+
+  it('filters titles case-insensitively when at least 3 characters are entered', () => {
     // "rev" should match "Plan review"
     const results = filterBookings(sampleBookings, 'rev');
     expect(results).toHaveLength(1);
@@ -43,7 +49,7 @@ describe('filterBookings', () => {
     expect(results[0].id).toBe('studio');
   });
 
-  it('returns empty array when query does not match any booking', () => {
+  it('returns empty array when query has at least 3 characters and does not match any booking', () => {
     const results = filterBookings(sampleBookings, 'nonexistent');
     expect(results).toEqual([]);
   });
