@@ -39,3 +39,100 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+
+# AI Development Workflow
+
+These rules apply to any software project, regardless of its tech stack or purpose.
+
+## 1. Phase Management
+
+- Analyze the existing codebase and requirements.
+- Divide development into logical phases.
+- Define goals, tasks, and completion criteria for each phase.
+- Present the initial plan for approval.
+- Automatically identify which phase each user prompt belongs to.
+- Allow multiple prompts, discussions, and fixes within one phase.
+- Do not mark a phase complete without verification.
+- Ask for approval before advancing to the next major phase.
+
+## 2. Continuous Documentation
+
+Maintain a two-tier documentation system under `docs/`:
+
+### Master Workflow Dashboard (`docs/AI-WORKFLOW.md`)
+A lightweight overview dashboard containing:
+- Current development phase and objective.
+- Overview of all planned phases and statuses, with links to their respective phase documents.
+- [x] Completed and [ ] pending tasks for the current phase.
+- Outstanding issues and decisions.
+- Next recommended action.
+
+*Do not store detailed prompt history in the master dashboard.*
+
+### Phase-Based Documentation (`docs/workflow/`)
+Maintain a dedicated directory with a separate Markdown file for each development phase using descriptive filenames (e.g. `docs/workflow/phase-<number>-<name>.md`).
+
+Every prompt, discussion, implementation, correction, and verification must be appended to its associated phase document.
+
+### Prompt Entry Requirements
+For EVERY user prompt, append to its corresponding phase document:
+- Sequential prompt number.
+- Actual timestamp in IST (Asia/Kolkata).
+- Original user prompt.
+- Associated development phase.
+- Brief discussion or implementation summary.
+- [x] Actions actually performed.
+- [ ] Actions not performed or not verified.
+- Decisions, scope boundaries, and missing requirements.
+- Files modified, if applicable.
+- Tests performed and actual results.
+- Next recommended action.
+
+Never delete or overwrite earlier prompt history. Preserve chronological order within each phase document.
+
+If a prompt relates to an earlier phase, update that phase's document without incorrectly changing the current active phase on the master dashboard.
+
+If a timestamp is unavailable, state that instead of inventing one.
+
+## 3. Development Rules
+
+- Inspect relevant code before making changes.
+- Implement only the requested scope; never implement beyond the explicitly approved scope without prior user approval.
+- Avoid unnecessary complexity.
+- Review generated code for correctness, security, and maintainability.
+- Run relevant tests and checks where possible.
+- Never claim something works without verification.
+- Record real issues, corrections, and decisions.
+- Keep secrets out of source code and logs.
+- Update both the master dashboard (`docs/AI-WORKFLOW.md`) and the relevant phase document (`docs/workflow/phase-*.md`) after every prompt.
+- Verify that documentation updates were saved successfully.
+
+## 4. Response Format
+
+Begin each response with:
+
+**Current Phase:** Phase name
+
+**Actions:**
+- [x] Completed action
+- [ ] Pending or unverified action
+
+**Decisions / Issues:** Relevant details, if any.
+
+**Documentation:** Updated or not updated.
+
+**Next:** Recommended next action.
+
+Keep responses concise.
+
+## 5. Planning Mode
+
+When working in PLAN mode:
+
+- Inspect the project and its requirements.
+- Propose phases and acceptance criteria.
+- Do not implement application features without approval.
+- If file writes are unavailable, clearly report that documentation was not saved.
+
+Never report incomplete work as completed.
