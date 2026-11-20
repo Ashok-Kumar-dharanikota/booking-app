@@ -235,34 +235,43 @@ All three conversions have been verified live on the Android emulator and in aut
 Following the baseline documentation, the application underwent a comprehensive UI/UX overhaul governed by **Impeccable** craft principles and a user-selected **Minimalist Monochromatic** visual direction (`#111827`, `#F9FAFB`, `#10B981`, `#059669`).
 
 ### Key Enhancements Implemented
-1. **Design System Tokens (`src/constants/theme.ts`)**: Structured palettes for light and dark modes, modular typography hierarchy, standardized 14dp/18dp card and chip radii, and tonal elevation definitions (`Elevation.card`, `Elevation.dialog`).
-2. **Branded Screen Top Bar & Filter Bar (`src/app/index.tsx`)**:
-   - Clean native navigation header with light/dark theme integration.
-   - Dynamic appointment count subtitle (`"3 scheduled appointments"` or `"1 matching appointment"`).
-   - Clock chip showing the formatted last updated time.
-   - Search input featuring a leading search glyph (`🔍`), focused border state, and an instant one-tap clear button (`✕`).
-   - Tonal elevated cards with category glyphs (`📸 Studio visit`, `📐 Site walkthrough`, `📋 Plan review`), timezone chips, and tactile press feedback.
-3. **Booking Details Screen (`src/app/bookings/[id].tsx`)**:
-   - Category glyph hero badge with booking ID pill.
-   - Tabular Schedule & Timezone information card with semantic row icons (`📅 Calendar Date`, `🕒 Local Time`, `🌐 IANA Timezone`).
-   - Tactile Check-in button transitioning to an emerald confirmation card with verified status badge (`✓ Checked in`, `You have successfully checked in for this booking.`).
-   - Integrated Note card with real-time character counter pill (`0/140`), clear button (`✕ Clear`), focused accent border, and auto-dismissing feedback banner (`✓ Note saved`).
-4. **Hardware-Synchronized Keyboard Handling**:
+1. **Lucide Vector Icons (`lucide-react-native` + `react-native-svg`)**:
+   - Replaced all raw unicode characters and emojis with sharp, scalable Lucide vector icons (`Search`, `X`, `Clock`, `Calendar`, `MapPin`, `CheckCircle2`, `ChevronRight`, `Camera`, `Building2`, `ClipboardCheck`, `Palette`, `ShieldCheck`, `Music2`, `Users`, `AlertCircle`, `RefreshCw`, `UserCheck`, `Sparkles`).
+2. **Relevant Banner Images (`expo-image`)**:
+   - Integrated curated, high-resolution Unsplash architectural and studio photography for every booking card.
+   - Rendered using `expo-image` with content-fit `cover`, smooth memory caching, and a floating category badge pill.
+3. **Expanded Realistic Appointment Fixtures (7 Bookings)**:
+   - Added 4 realistic appointments in `src/api/fake-server.ts`:
+     - `consult`: Design consultation (`America/Chicago`, 44th Fl Chicago IL)
+     - `audit`: Field security audit (`America/Denver`, 17th St Denver CO)
+     - `rehearsal`: Sound stage rehearsal (`Asia/Tokyo`, Shibuya Tokyo JP)
+     - `strategy`: Executive strategy sync (`Europe/Paris`, Place Vendôme Paris FR)
+   - Retained the malformed `broken` row to rigorously verify resilient row skipping.
+4. **Persistent Check-In via AsyncStorage**:
+   - Implemented `saveBookingCheckIn` and `getAllCheckedInBookings` in `src/lib/check-in.ts`.
+   - When a booking is checked in, the confirmation and timestamp are persisted locally under `@booking_checkin_${id}`.
+   - On the Booking List screen, all cards query AsyncStorage on mount and screen focus, prominently displaying a green `✓ Checked in` badge directly on checked-in booking cards.
+5. **Realistic Product Details & Metadata (`src/constants/booking-meta.ts`)**:
+   - Added venue addresses, assigned host names, and preparation instructions for all bookings.
+   - Rendered a dedicated `Location & Host` card on the detail screen with `MapPin`, `UserCheck`, and `Sparkles` icons.
+6. **Unambiguous Note Feedback Message**:
+   - Updated the save feedback to explicitly display `"Note saved successfully"` with an emerald Lucide `<CheckCircle2 />` icon, completely resolving visual ambiguity where "Note saved" was misread as "Not saved".
+7. **Hardware-Synchronized Keyboard Handling**:
    - Upgraded to `react-native-keyboard-controller` with root `<KeyboardProvider>` in `src/app/_layout.tsx`.
-   - Integrated `KeyboardAvoidingView` with platform-adaptive behavior (`behavior={Platform.OS === 'ios' ? 'padding' : 'height'}`) in `src/app/bookings/[id].tsx`.
-   - Keyboard automatically dismisses on drag (`keyboardDismissMode="on-drag"`) and on note save/clear actions (`Keyboard.dismiss()`), completely eliminating input clipping.
+   - Integrated `KeyboardAvoidingView` with platform-adaptive behavior in `src/app/bookings/[id].tsx`.
+   - Keyboard smoothly avoids inputs without clipping, and auto-dismisses on note save or background tap.
 
 ### Polished Screen Gallery
 
-| Booking List (Light) | Search Filtered (`rev`) | Booking Details |
+| Booking List (7 Appointments & Checked-in Badge) | Search Filtered (`consult`) | Booking Details (Hero & Location/Host) |
 |:---:|:---:|:---:|
 | ![Booking List](docs/screenshots/polished/booking-list.png) | ![Search Filtered](docs/screenshots/polished/booking-search-results.png) | ![Booking Detail](docs/screenshots/polished/booking-detail.png) |
-| *Elevated cards with category glyphs & chips.* | *Instant debounce filtering with clear action.* | *Timezone table, check-in, and note editor.* |
+| *High-res banners, Lucide icons, and live Checked-in badge.* | *Instant debounce filtering for Chicago consultation.* | *Hero card, venue address, host name, & schedule table.* |
 
-| Check-in Confirmed | Empty Note Validation | Note Saved Feedback |
+| Check-in Confirmed (Persisted) | Empty Note Validation | Note Saved Feedback (`Note saved successfully`) |
 |:---:|:---:|:---:|
 | ![Check-in Confirmed](docs/screenshots/polished/check-in-confirmed.png) | ![Empty Note Validation](docs/screenshots/polished/note-empty-validation.png) | ![Note Saved](docs/screenshots/polished/note-saved.png) |
-| *Verified emerald confirmation card.* | *Rose alert banner preventing empty notes.* | *Auto-dismissing emerald success banner.* |
+| *Verified emerald confirmation card with timestamp.* | *Rose alert banner preventing empty notes.* | *Clear "Note saved successfully" with Lucide CheckCircle2.* |
 
 | Booking List (Dark Mode) | Booking Details (Dark Mode) | Keyboard Controller Active |
 |:---:|:---:|:---:|
@@ -273,4 +282,4 @@ Following the baseline documentation, the application underwent a comprehensive 
 
 ## 6. Verification Summary
 
-All 24 automated unit tests (`vitest run`), strict TypeScript checking (`tsc --noEmit`), and Expo ESLint linting (`expo lint`) continue to pass at 100% with zero errors and zero warnings. All functional requirements from the assignment specification remain intact.
+All 27 automated unit tests across 5 test suites (`vitest run`), strict TypeScript checking (`tsc --noEmit`), and Expo ESLint linting (`expo lint`) continue to pass at 100% with zero errors and zero warnings. All functional requirements from the assignment specification remain intact.

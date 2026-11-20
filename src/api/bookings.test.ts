@@ -3,7 +3,7 @@ import { fetchBookings } from './bookings';
 import { DEFAULT_BOOKINGS_FIXTURE } from './fake-server';
 
 describe('fetchBookings', () => {
-  it('returns three valid bookings and excludes broken from the four-row fixture', async () => {
+  it('returns valid bookings and excludes broken from the fixture', async () => {
     const stubFetch: typeof fetch = async () => {
       return new Response(JSON.stringify(DEFAULT_BOOKINGS_FIXTURE), {
         status: 200,
@@ -13,8 +13,16 @@ describe('fetchBookings', () => {
 
     const bookings = await fetchBookings(stubFetch);
 
-    expect(bookings).toHaveLength(3);
-    expect(bookings.map((b) => b.id)).toEqual(['studio', 'site', 'review']);
+    expect(bookings).toHaveLength(7);
+    expect(bookings.map((b) => b.id)).toEqual([
+      'studio',
+      'site',
+      'review',
+      'consult',
+      'audit',
+      'rehearsal',
+      'strategy',
+    ]);
     expect(bookings.find((b) => b.id === 'broken')).toBeUndefined();
   });
 
@@ -34,8 +42,16 @@ describe('fetchBookings', () => {
     delete process.env.EXPO_PUBLIC_BOOKINGS;
 
     const bookings = await fetchBookings();
-    expect(bookings).toHaveLength(3);
-    expect(bookings.map((b) => b.id)).toEqual(['studio', 'site', 'review']);
+    expect(bookings).toHaveLength(7);
+    expect(bookings.map((b) => b.id)).toEqual([
+      'studio',
+      'site',
+      'review',
+      'consult',
+      'audit',
+      'rehearsal',
+      'strategy',
+    ]);
   });
 
   it('returns empty array when EXPO_PUBLIC_BOOKINGS=empty', async () => {

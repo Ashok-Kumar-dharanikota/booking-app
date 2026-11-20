@@ -10,15 +10,15 @@ For complete functional and interaction documentation, see [App-flow.md](App-flo
 
 ### 1. Polished Product Experience (Phase 7B)
 
-| Booking List Screen | Search Filtered (`rev`) | Booking Details |
+| Booking List (7 Appointments & Checked-in Badge) | Search Filtered (`consult`) | Booking Details (Hero & Host Info) |
 |:---:|:---:|:---:|
 | ![Booking List Screen](docs/screenshots/polished/booking-list.png) | ![Search Filtered](docs/screenshots/polished/booking-search-results.png) | ![Booking Detail](docs/screenshots/polished/booking-detail.png) |
-| *Tonal elevation cards with category glyphs & chips.* | *Instant debounce filtering with clear action.* | *Timezone table, check-in, and note editor.* |
+| *High-res banners, Lucide icons, & live Checked-in badge.* | *Instant debounce filtering for Chicago consultation.* | *Hero banner, venue address, host name, & schedule table.* |
 
-| Check-in Confirmed | Empty Note Validation | Note Saved Feedback |
+| Check-in Confirmed (Persisted) | Empty Note Validation | Note Saved Feedback (`Note saved successfully`) |
 |:---:|:---:|:---:|
 | ![Check-in Confirmed](docs/screenshots/polished/check-in-confirmed.png) | ![Empty Note Validation](docs/screenshots/polished/note-empty-validation.png) | ![Note Saved](docs/screenshots/polished/note-saved.png) |
-| *Verified emerald confirmation card.* | *Rose alert banner preventing empty notes.* | *Auto-dismissing emerald success banner.* |
+| *Verified emerald confirmation card with timestamp.* | *Rose alert banner preventing empty notes.* | *Clear "Note saved successfully" with Lucide CheckCircle2.* |
 
 | Booking List (Dark Mode) | Booking Details (Dark Mode) | Keyboard Controller Active |
 |:---:|:---:|:---:|
@@ -39,21 +39,27 @@ For complete functional and interaction documentation, see [App-flow.md](App-flo
 - **Booking List (`/`)**:
   - Fetches bookings from remote API or in-app fake server.
   - Pull-to-refresh with a dynamic `Updated` timestamp label.
+  - Curated high-resolution Unsplash architectural banner images per booking with category chips.
+  - Crisp vector iconography via **Lucide icons** (`lucide-react-native`).
   - Field labelled `Search bookings` with 300ms debouncing and 3-character threshold.
-  - Case-insensitive title search (e.g. searching `rev` matches only `Plan review`).
+  - Dynamic `✓ Checked in` badge indicator for bookings checked in and persisted via AsyncStorage.
+  - Case-insensitive title search (e.g. searching `consult` matches `Design consultation`).
   - Empty state (`No bookings`), search empty state (`No bookings match`), and error state (`Could not load bookings` with a `Try again` button).
   - Safe area compatibility and adaptive light/dark mode theming.
   
 - **Booking Detail (`/bookings/[id]`)**:
-  - Displays booking title and identifier.
-  - Displays calendar date formatted for the booking's specific timezone (e.g., `1 June 2026`).
-  - Converts and displays local time using the booking's IANA timezone ID (e.g., `11:00 AM America/New_York`, `11:00 AM America/Los_Angeles`, `3:00 PM Europe/London`).
-  - Displays IANA timezone ID.
-  - **Check-in availability**: `canCheckIn(now, startsAt)` enables check-in within 15 minutes before booking start time or anytime post-start.
+  - Displays booking hero banner with category tag and status pill.
+  - **Location & Host Card**: Displays venue address, host name, and specific preparation instructions.
+  - **Schedule & Timezone Card**: Displays calendar date formatted for the booking's specific timezone (e.g., `1 June 2026`), converts and displays local time (e.g., `11:00 AM America/New_York`, `11:00 AM America/Chicago`, `3:00 PM Europe/London`), and displays duration.
+  - **Persistent Check-in**:
+    - `canCheckIn(now, startsAt)` enables check-in within 15 minutes before booking start time or anytime post-start.
+    - Persists check-in state in AsyncStorage (`@booking_checkin_${id}`), displaying a verified emerald card with recorded timestamp and reflecting immediately on the list screen.
   - **Notes & Local Persistence**:
     - Field labelled `Note` with real-time character counter (`0/140`).
     - Button labelled `Save note`.
-    - Validation: Empty input shows `Enter a note`, > 140 characters shows `Keep the note under 140 characters`, valid input saves and shows `Note saved`.
+    - Button labelled `Clear note` for quick note reset.
+    - Validation: Empty input shows `Enter a note`, > 140 characters shows `Keep the note under 140 characters`.
+    - Unambiguous confirmation: Valid save explicitly displays `Note saved successfully` with Lucide `CheckCircle2` icon.
     - Persisted locally under key `@booking_note_${bookingId}` using `@react-native-async-storage/async-storage`.
     - Restores saved note when navigating back to the booking.
     - Keyboard-avoiding layout (`KeyboardAvoidingView` from `react-native-keyboard-controller` + `ScrollView`) keeping note input and Save button fully accessible when the keyboard is open.
@@ -63,8 +69,8 @@ For complete functional and interaction documentation, see [App-flow.md](App-flo
   - Fake server reads `EXPO_PUBLIC_BOOKINGS`:
     - `empty` -> HTTP 200 with `[]`.
     - `error` -> HTTP 500 with `{ "error": "unavailable" }`.
-    - Default/unset -> 4-row fixture (studio, site, broken, review).
-  - Skips malformed rows (such as `broken` lacking startsAt/timezone) without discarding valid rows.
+    - Default/unset -> 8-row fixture (7 valid appointments across NYC, LA, London, Chicago, Denver, Tokyo, Paris + 1 malformed row `broken`).
+  - Resilient row parser skips malformed rows without discarding valid rows.
   - Throws on HTTP 500 error.
 
 ---
@@ -76,6 +82,8 @@ For complete functional and interaction documentation, see [App-flow.md](App-flo
 - **React**: `19.3.0`
 - **React Native**: `0.88.1`
 - **TypeScript**: `~6.0.3`
+- **Iconography**: `lucide-react-native` (`^0.555.0`) & `react-native-svg` (`15.11.2`)
+- **Image Performance**: `expo-image` (`~3.0.11`)
 - **Keyboard Handling**: `react-native-keyboard-controller` (`~1.18.5`)
 - **Persistence**: `@react-native-async-storage/async-storage` (`2.2.0`)
 - **Automated Testing**: `vitest` (`^5.1.1`)

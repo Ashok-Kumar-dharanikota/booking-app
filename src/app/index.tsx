@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -10,20 +9,46 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import {
+  Search,
+  X,
+  Clock,
+  Calendar,
+  MapPin,
+  CheckCircle2,
+  ChevronRight,
+  Camera,
+  Building2,
+  ClipboardCheck,
+  Palette as PaletteIcon,
+  ShieldCheck,
+  Music2,
+  Users,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react-native';
 
 import { fetchBookings } from '@/api/bookings';
+import { getBookingMeta } from '@/constants/booking-meta';
 import { Elevation, Palette, Radii, Typography } from '@/constants/theme';
+import { canCheckIn, getAllCheckedInBookings } from '@/lib/check-in';
+import { formatBookingDate, formatBookingTime } from '@/lib/date-format';
 import { filterBookings } from '@/lib/filter';
 import { Booking } from '@/types/booking';
 
-function getCategoryGlyph(title: string): string {
-  const lower = title.toLowerCase();
-  if (lower.includes('studio')) return '📸';
-  if (lower.includes('walkthrough') || lower.includes('site')) return '📐';
-  if (lower.includes('review') || lower.includes('plan')) return '📋';
-  return '📅';
+function getCategoryIcon(id: string, title: string, color: string, size = 13) {
+  const lower = (id + ' ' + title).toLowerCase();
+  if (lower.includes('studio')) return <Camera size={size} color={color} />;
+  if (lower.includes('site') || lower.includes('walkthrough')) return <Building2 size={size} color={color} />;
+  if (lower.includes('review') || lower.includes('plan')) return <ClipboardCheck size={size} color={color} />;
+  if (lower.includes('consult') || lower.includes('design')) return <PaletteIcon size={size} color={color} />;
+  if (lower.includes('audit') || lower.includes('security')) return <ShieldCheck size={size} color={color} />;
+  if (lower.includes('rehearsal') || lower.includes('sound')) return <Music2 size={size} color={color} />;
+  if (lower.includes('strategy') || lower.includes('sync')) return <Users size={size} color={color} />;
+  return <Calendar size={size} color={color} />;
 }
 
 function SkeletonCard({ isDark }: { isDark: boolean }) {
@@ -36,34 +61,34 @@ function SkeletonCard({ isDark }: { isDark: boolean }) {
           backgroundColor: palette.surface,
           borderColor: palette.border,
         },
+        Elevation.card,
       ]}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardHeaderLeft}>
+      <View style={[styles.skeletonBanner, { backgroundColor: palette.surfaceVariant }]} />
+      <View style={styles.cardContent}>
+        <View style={styles.cardHeader}>
           <View
             style={[
-              styles.glyphContainer,
-              { backgroundColor: palette.surfaceVariant },
+              styles.skeletonBar,
+              { width: 140, height: 18, backgroundColor: palette.surfaceVariant },
             ]}
           />
-          <View style={styles.cardTitles}>
-            <View
-              style={[
-                styles.skeletonBar,
-                { width: 120, height: 16, backgroundColor: palette.surfaceVariant },
-              ]}
-            />
-            <View
-              style={[
-                styles.skeletonBar,
-                { width: 160, height: 12, marginTop: 6, backgroundColor: palette.surfaceVariant },
-              ]}
-            />
-          </View>
+          <View
+            style={[
+              styles.skeletonPill,
+              { width: 80, height: 20, backgroundColor: palette.surfaceVariant },
+            ]}
+          />
         </View>
         <View
           style={[
-            styles.skeletonPill,
-            { width: 90, height: 22, backgroundColor: palette.surfaceVariant },
+            styles.skeletonBar,
+            { width: 200, height: 12, marginTop: 10, backgroundColor: palette.surfaceVariant },
+          ]}
+        />
+        <View
+          style={[
+            styles.skeletonBar,
+            { width: 160, height: 12, marginTop: 8, backgroundColor: palette.surfaceVariant },
           ]}
         />
       </View>
@@ -77,6 +102,7 @@ export default function BookingListScreen() {
   const palette = Palette[isDark ? 'dark' : 'light'];
 
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [checkedInMap, setCheckedInMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,26 +122,48 @@ export default function BookingListScreen() {
     };
   }, [searchQuery]);
 
+  const loadCheckedInStatus = useCallback(async () => {
+    try {
+      const map = await getAllCheckedInBookings();
+      setCheckedInMap(map);
+    } catch {
+      // Non-critical background read
+    }
+  }, []);
+
+  // Refresh checked-in status whenever screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      void loadCheckedInStatus();
+    }, [loadCheckedInStatus])
+  );
+
   const fetchData = useCallback(async () => {
     try {
-      const data = await fetchBookings();
-      setBookings(data);
-      setLastUpdated(new Date());
+      const [data, map] = await Promise.all([fetchBookings(), getAllCheckedInBookings()]);
       setError(null);
+      setBookings(data);
+      setCheckedInMap(map);
+      setLastUpdated(new Date());
     } catch {
       setError('Could not load bookings');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     let ignore = false;
-    async function init() {
+
+    async function initialize() {
       try {
-        const data = await fetchBookings();
+        const [data, map] = await Promise.all([fetchBookings(), getAllCheckedInBookings()]);
         if (!ignore) {
-          setBookings(data);
-          setLastUpdated(new Date());
           setError(null);
+          setBookings(data);
+          setCheckedInMap(map);
+          setLastUpdated(new Date());
         }
       } catch {
         if (!ignore) {
@@ -128,52 +176,191 @@ export default function BookingListScreen() {
       }
     }
 
-    void init();
+    void initialize();
 
     return () => {
       ignore = true;
     };
   }, []);
 
-  const onRefresh = useCallback(async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchData();
-    setRefreshing(false);
   }, [fetchData]);
 
-  const onRetry = useCallback(async () => {
-    setLoading(true);
-    await fetchData();
-    setLoading(false);
-  }, [fetchData]);
-
+  // Apply 3-character threshold and debounced filtering
   const filteredBookings = filterBookings(bookings, debouncedQuery);
+
+  const renderBookingCard = ({ item }: { item: Booking }) => {
+    const meta = getBookingMeta(item);
+    const isCheckedIn = Boolean(checkedInMap[item.id]);
+    const checkInOpen = canCheckIn(new Date(), new Date(item.startsAt));
+    const formattedDate = formatBookingDate(item.startsAt, item.timezone);
+    const formattedTime = formatBookingTime(item.startsAt, item.timezone);
+
+    return (
+      <Pressable
+        style={({ pressed }) => [
+          styles.bookingCard,
+          {
+            backgroundColor: palette.surface,
+            borderColor: isCheckedIn ? palette.accent : palette.border,
+          },
+          Elevation.card,
+          pressed && styles.cardPressed,
+        ]}
+        onPress={() => router.push(`/bookings/${item.id}`)}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.title}, ${meta.category}, ${formattedTime}`}>
+        {/* Banner Image with Category & Status Overlay */}
+        <View style={styles.bannerContainer}>
+          <Image
+            source={{ uri: meta.imageUrl }}
+            style={styles.bannerImage}
+            contentFit="cover"
+            transition={200}
+          />
+          {/* Subtle Dark Gradient Overlay for Badges */}
+          <View style={styles.imageOverlay} />
+
+          {/* Floating Category Badge */}
+          <View style={styles.floatingCategoryBadge}>
+            {getCategoryIcon(item.id, item.title, '#FFFFFF', 12)}
+            <Text style={styles.floatingCategoryText}>{meta.category}</Text>
+          </View>
+
+          {/* Floating Status Badge */}
+          <View
+            style={[
+              styles.floatingStatusBadge,
+              isCheckedIn
+                ? { backgroundColor: palette.accent }
+                : checkInOpen
+                  ? { backgroundColor: 'rgba(15, 23, 42, 0.75)' }
+                  : { backgroundColor: 'rgba(15, 23, 42, 0.65)' },
+            ]}>
+            {isCheckedIn ? (
+              <View style={styles.badgeRow}>
+                <CheckCircle2 size={11} color="#FFFFFF" />
+                <Text style={styles.floatingStatusText}>Checked in</Text>
+              </View>
+            ) : (
+              <Text style={styles.floatingStatusText}>
+                {checkInOpen ? '• Check-in Open' : '• Scheduled'}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Card Content Details */}
+        <View style={styles.cardContent}>
+          <View style={styles.cardHeader}>
+            <Text style={[styles.bookingTitle, { color: palette.text }]} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <View
+              style={[
+                styles.timezoneBadge,
+                {
+                  backgroundColor: palette.surfaceVariant,
+                  borderColor: palette.border,
+                },
+              ]}>
+              <Text style={[styles.timezoneBadgeText, { color: palette.textSecondary }]}>
+                {item.timezone}
+              </Text>
+            </View>
+          </View>
+
+          {/* Location row */}
+          <View style={styles.metadataRow}>
+            <MapPin size={13} color={palette.textSecondary} />
+            <Text
+              style={[styles.metadataText, { color: palette.textSecondary }]}
+              numberOfLines={1}>
+              {meta.location}
+            </Text>
+          </View>
+
+          {/* Schedule Date & Local Time row */}
+          <View style={styles.scheduleRow}>
+            <View style={styles.scheduleItem}>
+              <Calendar size={13} color={palette.textSecondary} />
+              <Text style={[styles.scheduleText, { color: palette.text }]}>
+                {formattedDate}
+              </Text>
+            </View>
+            <Text style={[styles.scheduleDot, { color: palette.textTertiary }]}>•</Text>
+            <View style={styles.scheduleItem}>
+              <Clock size={13} color={palette.textSecondary} />
+              <Text style={[styles.scheduleText, { color: palette.text }]}>
+                {formattedTime}
+              </Text>
+            </View>
+          </View>
+
+          {/* Action Footer */}
+          <View style={[styles.cardFooter, { borderTopColor: palette.border }]}>
+            <Text style={[styles.cardFooterAction, { color: palette.textSecondary }]}>
+              {isCheckedIn ? 'View booking details' : 'Tap to view details & check-in'}
+            </Text>
+            <ChevronRight size={15} color={palette.textTertiary} />
+          </View>
+        </View>
+      </Pressable>
+    );
+  };
+
+  const renderEmptyState = () => {
+    if (loading) return null;
+
+    if (debouncedQuery.trim().length >= 3 && filteredBookings.length === 0) {
+      return (
+        <View style={styles.centerContainer}>
+          <View style={[styles.emptyIconCircle, { backgroundColor: palette.surfaceVariant }]}>
+            <Search size={28} color={palette.textSecondary} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: palette.text }]}>No bookings match</Text>
+          <Text style={[styles.emptySubtitle, { color: palette.textSecondary }]}>
+            No scheduled appointments match &ldquo;{debouncedQuery}&rdquo;
+          </Text>
+          <Pressable
+            style={[styles.clearFilterButton, { borderColor: palette.border }]}
+            onPress={() => setSearchQuery('')}>
+            <Text style={[styles.clearFilterButtonText, { color: palette.text }]}>
+              Clear search filter
+            </Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    if (bookings.length === 0) {
+      return (
+        <View style={styles.centerContainer}>
+          <View style={[styles.emptyIconCircle, { backgroundColor: palette.surfaceVariant }]}>
+            <Calendar size={28} color={palette.textSecondary} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: palette.text }]}>No bookings</Text>
+          <Text style={[styles.emptySubtitle, { color: palette.textSecondary }]}>
+            You currently have no scheduled appointments.
+          </Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
 
   if (loading && !refreshing) {
     return (
       <SafeAreaView
         style={[styles.safeArea, { backgroundColor: palette.background }]}
-        edges={['top', 'left', 'right']}>
-        <View style={styles.headerContainer}>
-          <View style={styles.topBar}>
-            <View>
-              <Text style={[styles.appTitle, { color: palette.text }]}>Bookings</Text>
-              <Text style={[styles.appSubtitle, { color: palette.textSecondary }]}>
-                Loading schedule...
-              </Text>
-            </View>
-          </View>
-        </View>
+        edges={['bottom', 'left', 'right']}>
         <View style={styles.skeletonContainer}>
           <SkeletonCard isDark={isDark} />
           <SkeletonCard isDark={isDark} />
           <SkeletonCard isDark={isDark} />
-          <View style={styles.loadingSpinnerRow}>
-            <ActivityIndicator size="small" color={palette.textSecondary} />
-            <Text style={[styles.loadingText, { color: palette.textSecondary }]}>
-              Loading bookings...
-            </Text>
-          </View>
         </View>
       </SafeAreaView>
     );
@@ -183,16 +370,13 @@ export default function BookingListScreen() {
     return (
       <SafeAreaView
         style={[styles.safeArea, { backgroundColor: palette.background }]}
-        edges={['top', 'left', 'right']}>
-        <View style={styles.headerContainer}>
-          <Text style={[styles.appTitle, { color: palette.text }]}>Bookings</Text>
-        </View>
+        edges={['bottom', 'left', 'right']}>
         <View style={styles.centerContainer}>
           <View style={[styles.errorIconCircle, { backgroundColor: palette.errorLight }]}>
-            <Text style={styles.errorIconGlyph}>⚠️</Text>
+            <AlertCircle size={32} color={palette.errorText} />
           </View>
-          <Text style={[styles.errorText, { color: palette.error }]}>Could not load bookings</Text>
-          <Text style={[styles.errorSubtext, { color: palette.textSecondary }]}>
+          <Text style={[styles.errorTitle, { color: palette.errorText }]}>Could not load bookings</Text>
+          <Text style={[styles.errorSubtitle, { color: palette.textSecondary }]}>
             Unable to connect to the scheduling service. Check your connection and try again.
           </Text>
           <Pressable
@@ -201,9 +385,10 @@ export default function BookingListScreen() {
               { backgroundColor: palette.primary },
               pressed && styles.buttonPressed,
             ]}
-            onPress={onRetry}
+            onPress={fetchData}
             accessibilityRole="button"
             accessibilityLabel="Try again">
+            <RefreshCw size={15} color={palette.primaryText} />
             <Text style={[styles.retryButtonText, { color: palette.primaryText }]}>Try again</Text>
           </Pressable>
         </View>
@@ -228,7 +413,7 @@ export default function BookingListScreen() {
           </Text>
           {lastUpdated && (
             <View style={[styles.updatedChip, { backgroundColor: palette.surfaceVariant }]}>
-              <Text style={styles.clockIcon}>🕒</Text>
+              <Clock size={11} color={palette.textSecondary} />
               <Text style={[styles.updatedLabel, { color: palette.textSecondary }]}>
                 Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </Text>
@@ -247,7 +432,7 @@ export default function BookingListScreen() {
                 borderColor: isSearchFocused ? palette.borderFocused : palette.border,
               },
             ]}>
-            <Text style={styles.searchIcon}>🔍</Text>
+            <Search size={16} color={isSearchFocused ? palette.text : palette.textTertiary} style={styles.searchIcon} />
             <TextInput
               style={[styles.searchInput, { color: palette.text }]}
               placeholder="Search bookings"
@@ -263,105 +448,33 @@ export default function BookingListScreen() {
             {searchQuery.length > 0 && (
               <Pressable
                 onPress={() => setSearchQuery('')}
-                hitSlop={8}
+                hitSlop={10}
                 style={styles.clearSearchButton}
                 accessibilityRole="button"
-                accessibilityLabel="Clear search input">
-                <Text style={[styles.clearSearchIcon, { color: palette.textTertiary }]}>✕</Text>
+                accessibilityLabel="Clear search">
+                <X size={15} color={palette.textSecondary} />
               </Pressable>
             )}
           </View>
         </View>
       </View>
 
+      {/* Main Virtualized List */}
       <FlatList
         data={filteredBookings}
         keyExtractor={(item) => item.id}
-        keyboardShouldPersistTaps="handled"
+        renderItem={renderBookingCard}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={palette.text}
-            colors={[palette.text]}
+            onRefresh={handleRefresh}
+            tintColor={palette.primary}
+            colors={[palette.primary]}
           />
-        }
-        renderItem={({ item }) => {
-          const glyph = getCategoryGlyph(item.title);
-          return (
-            <Pressable
-              style={({ pressed }) => [
-                styles.bookingCard,
-                {
-                  backgroundColor: palette.surface,
-                  borderColor: palette.border,
-                },
-                Elevation.card,
-                pressed && styles.cardPressed,
-              ]}
-              onPress={() => {
-                router.push({
-                  pathname: '/bookings/[id]',
-                  params: { id: item.id },
-                });
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={`Booking ${item.title}`}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardHeaderLeft}>
-                  <View
-                    style={[
-                      styles.glyphContainer,
-                      { backgroundColor: palette.surfaceVariant },
-                    ]}>
-                    <Text style={styles.glyphText}>{glyph}</Text>
-                  </View>
-                  <View style={styles.cardTitles}>
-                    <Text style={[styles.bookingTitle, { color: palette.text }]}>
-                      {item.title}
-                    </Text>
-                    <Text style={[styles.bookingSubtext, { color: palette.textSecondary }]}>
-                      Tap to view details & check-in
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.cardHeaderRight}>
-                  <View
-                    style={[
-                      styles.timezoneBadge,
-                      {
-                        backgroundColor: palette.surfaceVariant,
-                        borderColor: palette.border,
-                      },
-                    ]}>
-                    <Text style={[styles.timezoneBadgeText, { color: palette.text }]}>
-                      {item.timezone}
-                    </Text>
-                  </View>
-                  <Text style={[styles.chevronIcon, { color: palette.textTertiary }]}>›</Text>
-                </View>
-              </View>
-            </Pressable>
-          );
-        }}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={[styles.emptyIconCircle, { backgroundColor: palette.surfaceVariant }]}>
-              <Text style={styles.emptyIconGlyph}>
-                {bookings.length === 0 ? '📅' : '🔍'}
-              </Text>
-            </View>
-            <Text style={[styles.emptyText, { color: palette.text }]}>
-              {bookings.length === 0 ? 'No bookings' : 'No bookings match'}
-            </Text>
-            <Text style={[styles.emptySubtext, { color: palette.textSecondary }]}>
-              {bookings.length === 0
-                ? 'There are no appointments scheduled at this time.'
-                : `No results found for "${debouncedQuery}". Try another title.`}
-            </Text>
-          </View>
         }
       />
     </SafeAreaView>
@@ -383,12 +496,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  appTitle: {
-    ...Typography.display,
-  },
   appSubtitle: {
     ...Typography.caption,
-    marginTop: 2,
+    fontWeight: '500',
   },
   updatedChip: {
     flexDirection: 'row',
@@ -397,9 +507,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: Radii.pill,
     gap: 4,
-  },
-  clockIcon: {
-    fontSize: 11,
   },
   updatedLabel: {
     ...Typography.micro,
@@ -410,6 +517,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     ...Typography.micro,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 6,
   },
   searchInputWrapper: {
@@ -421,7 +529,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   searchIcon: {
-    fontSize: 14,
     marginRight: 8,
   },
   searchInput: {
@@ -431,11 +538,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   clearSearchButton: {
-    padding: 4,
-  },
-  clearSearchIcon: {
-    fontSize: 14,
-    fontWeight: '700',
+    padding: 6,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -446,132 +549,145 @@ const styles = StyleSheet.create({
   bookingCard: {
     borderWidth: 1,
     borderRadius: Radii.card,
-    padding: 14,
-    marginBottom: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
   },
   cardPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.99 }],
+    opacity: 0.9,
+    transform: [{ scale: 0.995 }],
+  },
+  bannerContainer: {
+    width: '100%',
+    height: 120,
+    position: 'relative',
+  },
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  floatingCategoryBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: Radii.pill,
+    gap: 5,
+  },
+  floatingCategoryText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  floatingStatusBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: Radii.pill,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  floatingStatusText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  cardContent: {
+    padding: 14,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  cardHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 12,
-  },
-  glyphContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  glyphText: {
-    fontSize: 18,
-  },
-  cardTitles: {
-    flex: 1,
+    marginBottom: 6,
   },
   bookingTitle: {
     ...Typography.title,
-  },
-  bookingSubtext: {
-    ...Typography.caption,
-    marginTop: 2,
-  },
-  cardHeaderRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginLeft: 8,
+    flex: 1,
+    marginRight: 8,
   },
   timezoneBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: Radii.chip,
     borderWidth: 1,
   },
   timezoneBadgeText: {
     ...Typography.micro,
+    fontWeight: '500',
   },
-  chevronIcon: {
-    fontSize: 20,
-    fontWeight: '300',
+  metadataRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  metadataText: {
+    ...Typography.caption,
+    flex: 1,
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
+  scheduleItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  scheduleText: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
+  scheduleDot: {
+    fontSize: 10,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: 8,
+    marginTop: 2,
+  },
+  cardFooterAction: {
+    ...Typography.micro,
   },
   centerContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
-    gap: 12,
+    gap: 10,
   },
   skeletonContainer: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    gap: 8,
+    gap: 12,
+  },
+  skeletonBanner: {
+    width: '100%',
+    height: 120,
   },
   skeletonBar: {
     borderRadius: 4,
   },
   skeletonPill: {
-    borderRadius: Radii.chip,
-  },
-  loadingSpinnerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 16,
-  },
-  loadingText: {
-    ...Typography.caption,
-  },
-  errorIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  errorIconGlyph: {
-    fontSize: 24,
-  },
-  errorText: {
-    ...Typography.headline,
-    textAlign: 'center',
-  },
-  errorSubtext: {
-    ...Typography.body,
-    textAlign: 'center',
-    maxWidth: 280,
-  },
-  retryButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: Radii.button,
-    marginTop: 12,
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  retryButtonText: {
-    ...Typography.title,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 56,
-    paddingHorizontal: 24,
-    gap: 8,
+    borderRadius: 12,
   },
   emptyIconCircle: {
     width: 60,
@@ -581,16 +697,56 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 6,
   },
-  emptyIconGlyph: {
-    fontSize: 26,
+  emptyTitle: {
+    ...Typography.title,
   },
-  emptyText: {
-    ...Typography.headline,
+  emptySubtitle: {
+    ...Typography.caption,
     textAlign: 'center',
+    maxWidth: 260,
   },
-  emptySubtext: {
-    ...Typography.body,
+  clearFilterButton: {
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: Radii.chip,
+    borderWidth: 1,
+  },
+  clearFilterButtonText: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
+  errorIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  errorTitle: {
+    ...Typography.title,
+  },
+  errorSubtitle: {
+    ...Typography.caption,
     textAlign: 'center',
     maxWidth: 280,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: Radii.pill,
+    marginTop: 8,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  buttonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
 });

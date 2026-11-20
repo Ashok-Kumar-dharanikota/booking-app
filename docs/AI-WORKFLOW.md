@@ -27,24 +27,15 @@
 - [x] Initialize Impeccable design system context (`PRODUCT.md` created, platform set to `android`).
 - [x] Align on Minimalist Monochromatic direction (`#111827`, `#F9FAFB`, `#10B981`) and tonal elevation cards.
 - [x] Define cohesive design system tokens (`src/constants/theme.ts`) with light/dark palettes, typography, and elevation.
-- [x] Refine Booking List UI (`src/app/index.tsx`) with status bar, appointment count, formatted timestamp chip, search input with glyph & clear button, and tonal elevation cards.
-- [x] Refine Booking Detail UI (`src/app/bookings/[id].tsx`) with category glyph hero, Schedule & Timezone table, emerald verified check-in banner, note editor with character count pill and clear action.
+- [x] Install and integrate `lucide-react-native` and `react-native-svg` for sharp vector icons across list and detail screens.
+- [x] Integrate high-resolution Unsplash architectural banner images using `expo-image` with subtle gradient and category tags.
+- [x] Expand appointment dataset with 4 new cards (`consult`, `audit`, `rehearsal`, `strategy` -> 7 valid bookings + 1 malformed row `broken`).
+- [x] Implement check-in persistence in AsyncStorage (`saveBookingCheckIn`, `getBookingCheckIn`, `getAllCheckedInBookings`).
+- [x] Reflect checked-in state dynamically on Booking List screen cards (`✓ Checked in` emerald badge on focus/mount).
+- [x] Add realistic metadata (`src/constants/booking-meta.ts`) with venue addresses, host names, and preparation instructions.
+- [x] Resolve note save feedback ambiguity: explicitly display `"Note saved successfully"` with Lucide `<CheckCircle2 />` icon.
 - [x] Install and configure `react-native-keyboard-controller` (`KeyboardProvider` in `_layout.tsx`, `KeyboardAvoidingView` with platform-adaptive behavior in `bookings/[id].tsx`).
-- [x] Verify with Vitest automated tests (`npm test` -> 24/24 passing), TypeScript (`npx tsc --noEmit` -> 0 errors), and linter (`npx expo lint` -> 0 errors, 0 warnings).
-- [x] Capture authentic polished screenshots on `emulator-5554` for both light and dark themes in `docs/screenshots/polished/`.
-- [x] Update `App-flow.md` and `README.md` with polished screen previews and technical specifications.
-
----
-
-## Active Phase 7B Tasks
-
-- [x] Initialize Impeccable design system context (`PRODUCT.md` created, platform set to `android`).
-- [x] Align on Minimalist Monochromatic direction (`#111827`, `#F9FAFB`, `#10B981`) and tonal elevation cards.
-- [x] Define cohesive design system tokens (`src/constants/theme.ts`) with light/dark palettes, typography, and elevation.
-- [x] Refine Booking List UI (`src/app/index.tsx`) with status bar, appointment count, formatted timestamp chip, search input with glyph & clear button, and tonal elevation cards.
-- [x] Refine Booking Detail UI (`src/app/bookings/[id].tsx`) with category glyph hero, Schedule & Timezone table, emerald verified check-in banner, note editor with character count pill and clear action.
-- [x] Install and configure `react-native-keyboard-controller` (`KeyboardProvider` in `_layout.tsx`, `KeyboardAvoidingView` with platform-adaptive behavior in `bookings/[id].tsx`).
-- [x] Verify with Vitest automated tests (`npm test` -> 24/24 passing), TypeScript (`npx tsc --noEmit` -> 0 errors), and linter (`npx expo lint` -> 0 errors, 0 warnings).
+- [x] Verify with Vitest automated tests (`npm test` -> 27/27 passing across 5 suites), TypeScript (`npx tsc --noEmit` -> 0 errors), and linter (`npx expo lint` -> 0 errors, 0 warnings).
 - [x] Capture authentic polished screenshots on `emulator-5554` for both light and dark themes in `docs/screenshots/polished/`.
 - [x] Update `App-flow.md` and `README.md` with polished screen previews and technical specifications.
 

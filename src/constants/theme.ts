@@ -44,6 +44,11 @@ export const Palette = {
 } as const;
 
 export const Typography = {
+  hero: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+    letterSpacing: -0.4,
+  },
   display: {
     fontSize: 26,
     fontWeight: '700' as const,
@@ -58,6 +63,11 @@ export const Typography = {
     fontSize: 16,
     fontWeight: '600' as const,
     letterSpacing: -0.2,
+  },
+  button: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    letterSpacing: 0.1,
   },
   body: {
     fontSize: 14,

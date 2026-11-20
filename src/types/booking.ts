@@ -3,6 +3,12 @@ export interface Booking {
   title: string;
   startsAt: string;
   timezone: string;
+  imageUrl?: string;
+  location?: string;
+  category?: string;
+  host?: string;
+  duration?: string;
+  instructions?: string;
 }
 
 export function isValidBooking(item: unknown): item is Booking {
