@@ -1,7 +1,7 @@
 # Master AI Workflow Dashboard
 
-**Current Phase:** Phase 4: Booking Detail Screen (`/bookings/[id]`) & Timezone Conversion (Completed)  
-**Current Objective:** Implement the booking detail screen with accurate timezone formatting and check-in button state.
+**Current Phase:** Phase 5: Note Persistence, Validation, & Keyboard Avoidance (Completed)  
+**Current Objective:** Implement note input, validation rules, local AsyncStorage persistence, and keyboard-avoiding layout.
 
 ---
 
@@ -14,32 +14,30 @@
 | **Phase 2** | Core Domain Logic, Fake Server, API Client & Tests | Completed | [Phase 2 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-2-core-logic-api.md) |
 | **Phase 3** | Booking List Screen (`/`) with Search & Refresh | Completed | [Phase 3 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-3-list-screen.md) |
 | **Phase 4** | Booking Detail Screen (`/bookings/[id]`) & Timezone | Completed | [Phase 4 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-4-detail-timezone.md) |
-| **Phase 5** | Note Persistence, Validation, & Keyboard Avoidance | Ready to Begin | [Phase 5 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-5-notes-persistence.md) |
-| **Phase 6** | Verification, Argent Agentic Testing & Submission Docs | Pending | [Phase 6 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-6-verification.md) |
+| **Phase 5** | Note Persistence, Validation, & Keyboard Avoidance | Completed | [Phase 5 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-5-notes-persistence.md) |
+| **Phase 6** | Verification, Argent Agentic Testing & Submission Docs | Ready to Begin | [Phase 6 Documentation](file:///c:/Users/ASUS/OneDrive/Documents/Ashok%20Kumar/Job/Assessments/booking-app/docs/workflow/phase-6-verification.md) |
 
 ---
 
-## Completed Tasks for Phase 4
+## Completed Tasks for Phase 5
 
-- [x] Implement timezone conversion helpers `formatBookingDate` and `formatBookingTime` in `src/lib/date-format.ts`.
-- [x] Write and pass automated unit tests in `src/lib/date-format.test.ts` verifying exact target table (Studio visit = 11:00 AM EDT, Site walkthrough = 11:00 AM PDT, Plan review = 3:00 PM BST).
-- [x] Implement `src/app/bookings/[id].tsx` displaying:
-  - Booking title.
-  - Calendar date.
-  - Local time in booking's timezone.
-  - IANA timezone ID.
-  - Check-in button enabled/disabled according to `canCheckIn`.
+- [x] Implement note validation and AsyncStorage persistence in `src/lib/notes.ts`.
+- [x] Write and pass automated unit tests in `src/lib/notes.test.ts` (7 tests).
+- [x] Integrate Note field labelled `Note` and `Save note` button in `src/app/bookings/[id].tsx`.
+- [x] Implement inline validation messages (`Enter a note`, `Keep the note under 140 characters`, `Note saved`).
+- [x] Load and restore saved notes per booking ID upon screen entry.
+- [x] Wrap view in `KeyboardAvoidingView` and `ScrollView` for keyboard accessibility.
 - [x] Verify static analysis: `npx tsc --noEmit` and `npx expo lint`.
-- [x] Commit Phase 4 to Git repository.
+- [x] Commit Phase 5 to Git repository.
 
 ---
 
 ## Outstanding Issues & Decisions
 
-None. All 17 unit tests passing, zero lint warnings, and zero TypeScript errors.
+None. All 24 unit tests passing, zero lint warnings, and zero TypeScript errors.
 
 ---
 
 ## Next Recommended Action
 
-Obtain user approval to proceed to Phase 5: Note Persistence, Validation, & Keyboard Avoidance.
+Obtain user approval to proceed to Phase 6: Verification, Argent Agentic Testing & Submission Documentation.
