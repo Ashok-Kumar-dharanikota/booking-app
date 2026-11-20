@@ -190,6 +190,18 @@ All three conversions have been verified live on the Android emulator and in aut
 |:---:|:---:|:---:|
 | ![Empty Validation](docs/screenshots/baseline/note-empty-validation.png) | ![Note Saved](docs/screenshots/baseline/note-saved.png) | ![Note Restored](docs/screenshots/baseline/note-restored.png) |
 
+### Flow 6: Environment Configurations & Edge States (Empty & Error)
+1. **Empty API Dataset (`EXPO_PUBLIC_BOOKINGS=empty`)**:
+   - The fake server responds with `[]` (HTTP 200).
+   - The list transitions to the centered empty placeholder: `"No bookings"`.
+2. **API Failure & Retry (`EXPO_PUBLIC_BOOKINGS=error`)**:
+   - The fake server responds with HTTP 500 (`{ "error": "unavailable" }`).
+   - The list screen renders the error label `"Could not load bookings"` in red with a blue `"Try again"` button.
+
+| Empty Dataset (`EXPO_PUBLIC_BOOKINGS=empty`) | API Error & Retry (`EXPO_PUBLIC_BOOKINGS=error`) |
+|:---:|:---:|
+| ![Empty Dataset](docs/screenshots/baseline/booking-list-empty.png) | ![API Error](docs/screenshots/baseline/booking-list-error.png) |
+
 ---
 
 ## 4. Interaction Verification Matrix
@@ -211,9 +223,9 @@ All three conversions have been verified live on the Android emulator and in aut
 | **V-13** | Note Validation | Type > 140 chars and save | Display `Keep the note under 140 characters` | Character count shows red; validation rejects | **PASS** | Automated test (`notes.test.ts`) | Code verified & tested |
 | **V-14** | Note Saving | Type valid note and save | Write to AsyncStorage; show `Note saved` | Shows `Note saved` in green; AsyncStorage written | **PASS** | Argent live interaction | [note-saved.png](docs/screenshots/baseline/note-saved.png) |
 | **V-15** | Note Persistence | Navigate back to list and re-enter | Restore saved note in input field | Re-opened Studio visit; note restored from storage | **PASS** | Argent live interaction | [note-restored.png](docs/screenshots/baseline/note-restored.png) |
-| **V-16** | Keyboard Avoidance | Focus note input | Input and Save button remain accessible | Wrapped in `KeyboardAvoidingView` + `ScrollView` | **PASS** | Code inspection & device test | Verified |
-| **V-17** | Empty API Dataset | `EXPO_PUBLIC_BOOKINGS=empty` | Display `No bookings` | Returns `[]`, list shows `No bookings` | **PASS** | Automated test (`bookings.test.ts`) | Code verified & tested |
-| **V-18** | API Error & Retry | `EXPO_PUBLIC_BOOKINGS=error` | Display `Could not load bookings` + `Try again` | Throws HTTP 500; UI shows error with retry button | **PASS** | Automated test (`bookings.test.ts`) | Code verified & tested |
+| **V-16** | Keyboard Handling | Focus note input, tap outside or tap Save note | Input dismisses cleanly, view avoids overlap | `Keyboard.dismiss()` on save & tap outside; `keyboardDismissMode="on-drag"` | **PASS** | Argent live interaction | [note-saved.png](docs/screenshots/baseline/note-saved.png) |
+| **V-17** | Empty API Dataset | `EXPO_PUBLIC_BOOKINGS=empty` | Display `No bookings` | Returns `[]`, list shows centered `No bookings` | **PASS** | Automated test + Argent live capture | [booking-list-empty.png](docs/screenshots/baseline/booking-list-empty.png) |
+| **V-18** | API Error & Retry | `EXPO_PUBLIC_BOOKINGS=error` | Display `Could not load bookings` + `Try again` | Throws HTTP 500; UI shows error with retry button | **PASS** | Automated test + Argent live capture | [booking-list-error.png](docs/screenshots/baseline/booking-list-error.png) |
 | **V-19** | Malformed Row Skipping | 4-row fixture with `broken` | Returns 3 bookings, skips `broken` row | Parsed 3 valid rows; excluded malformed item | **PASS** | Automated test (`bookings.test.ts`) | Code verified & tested |
 
 ---

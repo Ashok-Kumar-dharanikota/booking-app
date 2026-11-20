@@ -27,19 +27,22 @@
 - [x] Read `AGENTS.md`, `docs/AI-WORKFLOW.md`, and verify clean git status.
 - [x] Connect to running Android emulator (`emulator-5554`) via Argent.
 - [x] Interactively execute list, search, pull-to-refresh, detail, timezone, check-in, and note persistence user flows.
-- [x] Capture 12 authentic baseline screenshots into `docs/screenshots/baseline/`:
-  - `booking-list.png`
-  - `booking-list-refresh.png`
-  - `booking-search-results.png`
-  - `booking-search-no-match.png`
-  - `booking-detail-studio.png`
-  - `booking-detail-site.png`
-  - `booking-detail-review.png`
-  - `check-in-available.png`
-  - `check-in-confirmed.png`
-  - `note-empty-validation.png`
-  - `note-saved.png`
-  - `note-restored.png`
+- [x] Fixed keyboard handling in Booking Details screen (`Keyboard.dismiss()`, `TouchableWithoutFeedback`, `keyboardDismissMode="on-drag"`).
+- [x] Capture 14 authentic baseline screenshots into `docs/screenshots/baseline/`:
+  - `booking-list.png` (loaded feed with 3 bookings and timestamp)
+  - `booking-list-refresh.png` (pull-to-refresh updated timestamp)
+  - `booking-search-results.png` (debounced search for `rev` showing `Plan review`)
+  - `booking-search-no-match.png` (query `revxyz` showing `No bookings match`)
+  - `booking-detail-studio.png` (11:00 AM EDT, America/New_York)
+  - `booking-detail-site.png` (11:00 AM PDT, America/Los_Angeles)
+  - `booking-detail-review.png` (3:00 PM BST, Europe/London)
+  - `check-in-available.png` (active blue `Check in` button)
+  - `check-in-confirmed.png` (green `Checked in` confirmation)
+  - `note-empty-validation.png` (red `Enter a note` validation message)
+  - `note-saved.png` (green `Note saved` feedback)
+  - `note-restored.png` (re-entered screen with restored note from AsyncStorage)
+  - `booking-list-empty.png` (`EXPO_PUBLIC_BOOKINGS=empty` -> `No bookings`)
+  - `booking-list-error.png` (`EXPO_PUBLIC_BOOKINGS=error` -> `Could not load bookings` + `Try again`)
 - [x] Author comprehensive root-level `App-flow.md` with:
   - Application overview and purpose.
   - Screen inventory with element breakdowns and available interactions.

@@ -29,6 +29,13 @@ For complete functional and interaction documentation, see [App-flow.md](App-flo
 | ![Empty Note Validation](docs/screenshots/baseline/note-empty-validation.png) | ![Note Saved](docs/screenshots/baseline/note-saved.png) | ![Note Restored](docs/screenshots/baseline/note-restored.png) |
 | *Saving empty note triggers validation error: `Enter a note`.* | *Valid note written to AsyncStorage with `Note saved` feedback.* | *Navigating back and re-opening booking restores note from local storage.* |
 
+### 4. Edge Cases: Empty Dataset & API Error States
+
+| Empty Dataset (`EXPO_PUBLIC_BOOKINGS=empty`) | API Error & Retry (`EXPO_PUBLIC_BOOKINGS=error`) |
+|:---:|:---:|
+| ![Empty Dataset](docs/screenshots/baseline/booking-list-empty.png) | ![API Error](docs/screenshots/baseline/booking-list-error.png) |
+| *Server returning `[]` displays centered `No bookings`.* | *Server returning HTTP 500 displays `Could not load bookings` with retry button.* |
+
 ---
 
 ## Features

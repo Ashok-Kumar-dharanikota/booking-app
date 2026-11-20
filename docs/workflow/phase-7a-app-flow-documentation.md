@@ -71,4 +71,78 @@
   - Argent agentic testing: 100% live verification across list, search, detail, timezone, check-in, and note flows.
 
 - **Next Recommended Action:**
-  - Stop and present Phase 7A final report to user; wait for review before beginning Impeccable UI polish in Phase 7B.
+  - Proceed to Prompt 10 screenshot alignment, keyboard handling in Booking Details, and `EXPO_PUBLIC_BOOKINGS` edge state verification.
+
+---
+
+## Prompt 10 Entry
+
+- **Prompt Number:** 10
+- **Timestamp:** 2026-11-20T15:50:00+05:30 (IST)
+- **Original User Prompt:**
+> Verify this screenshots, it is not matching with the images
+> 1. Site Walkthrough (Los Angeles)
+> 2. Note Saved Confirmation
+> 3. Empty Note Validation
+> 
+> Keyboard handling is not done in Booking details. Verify different states of EXPO_PUBLIC_BOOKINGS and capture the screenshot.
+
+- **Associated Development Phase:** Phase 7A: App Flow Documentation & Screenshot Evidence
+- **Discussion & Implementation Plan:**
+  - Resolved keyboard handling in `src/app/bookings/[id].tsx`:
+    - Added `Keyboard.dismiss()` inside `handleSaveNote` so tapping "Save note" instantly dismisses the virtual keyboard, revealing inline validation/confirmation feedback clearly without user scrolling.
+    - Wrapped scrollable content with `TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}` to dismiss keyboard upon tapping any neutral area outside the text input.
+    - Added `keyboardDismissMode="on-drag"` to `ScrollView` for smooth, native gesture-based keyboard dismissal.
+  - Re-captured and realigned mismatched screenshots on Android emulator (`emulator-5554`) via authentic adb screencap:
+    - `booking-detail-site.png`: Waited for complete component mount; displays "Site walkthrough", "ID: site", "1 June 2026", "11:00 AM", "America/Los_Angeles".
+    - `note-saved.png`: Captured with green "Note saved" confirmation and virtual keyboard dismissed.
+    - `note-empty-validation.png`: Tapped "Save note" on empty Plan review booking; captured red "Enter a note" inline validation error with keyboard dismissed.
+    - `note-restored.png`: Re-opened Studio visit; captured restored saved note without virtual keyboard overlay.
+  - Verified and captured `EXPO_PUBLIC_BOOKINGS` environment states:
+    - `EXPO_PUBLIC_BOOKINGS=empty`: Started Metro with `.env.local` containing `EXPO_PUBLIC_BOOKINGS=empty`, captured `docs/screenshots/baseline/booking-list-empty.png` showing centered "No bookings".
+    - `EXPO_PUBLIC_BOOKINGS=error`: Started Metro with `.env.local` containing `EXPO_PUBLIC_BOOKINGS=error`, captured `docs/screenshots/baseline/booking-list-error.png` showing centered red "Could not load bookings" with blue "Try again" button.
+    - Restored default fixture environment, reloaded app in Expo Go, and verified 3 scheduled bookings returned.
+  - Updated documentation:
+    - `App-flow.md`: Added Flow 6 (Environment Configurations & Edge States) and updated V-16, V-17, V-18 verifications.
+    - `README.md`: Added Section 4 with embedded Empty Dataset and API Error screenshots.
+    - `docs/AI-WORKFLOW.md`: Recorded 14 authentic screenshots and updated status.
+
+- **Actions Performed:**
+  - [x] Fixed keyboard handling in `src/app/bookings/[id].tsx` (`Keyboard.dismiss()`, `TouchableWithoutFeedback`, `keyboardDismissMode="on-drag"`).
+  - [x] Verified TypeScript compilation (`npx tsc --noEmit` -> 0 errors).
+  - [x] Verified Vitest automated tests (`npm test` -> 24/24 tests passed).
+  - [x] Re-captured authentic `booking-detail-site.png` (matching Site Walkthrough Los Angeles).
+  - [x] Re-captured authentic `note-saved.png` (matching Note Saved confirmation).
+  - [x] Re-captured authentic `note-empty-validation.png` (matching Empty Note validation error).
+  - [x] Re-captured authentic `note-restored.png` (clean restored note without keyboard overlay).
+  - [x] Captured authentic `booking-list-empty.png` under `EXPO_PUBLIC_BOOKINGS=empty`.
+  - [x] Captured authentic `booking-list-error.png` under `EXPO_PUBLIC_BOOKINGS=error`.
+  - [x] Restored default environment and verified live app state.
+  - [x] Updated `App-flow.md`, `README.md`, and `docs/AI-WORKFLOW.md`.
+
+- **Actions Not Performed:**
+  - [ ] Redesigning UI (deferred to Phase 7B per plan).
+
+- **Decisions, Scope Boundaries & Missing Requirements:**
+  - `EXPO_PUBLIC_BOOKINGS` requires Metro restart with cache clear because Expo Router / Metro inlines `process.env.EXPO_PUBLIC_*` constants at bundle time. Both empty and error states were proven live on emulator.
+
+- **Files Modified / Created:**
+  - `src/app/bookings/[id].tsx` (Modified: keyboard handling)
+  - `docs/screenshots/baseline/booking-detail-site.png` (Replaced with loaded view)
+  - `docs/screenshots/baseline/note-saved.png` (Replaced with clean confirmation)
+  - `docs/screenshots/baseline/note-empty-validation.png` (Replaced with red validation error)
+  - `docs/screenshots/baseline/note-restored.png` (Replaced with clean restored note)
+  - `docs/screenshots/baseline/booking-list-empty.png` (Created)
+  - `docs/screenshots/baseline/booking-list-error.png` (Created)
+  - `App-flow.md` (Updated)
+  - `README.md` (Updated)
+  - `docs/AI-WORKFLOW.md` (Updated)
+  - `docs/workflow/phase-7a-app-flow-documentation.md` (Updated)
+
+- **Tests Performed & Results:**
+  - `npm test`: 24 passed (100% pass).
+  - `npx tsc --noEmit`: 0 errors.
+  - Android emulator live verification: 14 distinct, authentic screenshots captured and verified.
+
+- **Next Recommended Action:**
+  - Present Phase 7A verified documentation and screenshot alignment report; await user review to begin Phase 7B (Impeccable UI polish).

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -8,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
   useColorScheme,
 } from 'react-native';
@@ -83,6 +85,8 @@ export default function BookingDetailScreen() {
 
   const handleSaveNote = useCallback(async () => {
     if (!id) return;
+
+    Keyboard.dismiss();
 
     const validation = validateNote(note);
     if (!validation.isValid) {
@@ -165,7 +169,10 @@ export default function BookingDetailScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag">
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={styles.innerContent}>
           {/* Title Header */}
           <View style={styles.titleSection}>
             <Text style={[styles.bookingTitle, dynamicStyles.text]}>{booking.title}</Text>
@@ -290,7 +297,9 @@ export default function BookingDetailScreen() {
               )}
             </Pressable>
           </View>
-        </ScrollView>
+        </View>
+      </TouchableWithoutFeedback>
+    </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -306,6 +315,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
+  },
+  innerContent: {
     gap: 16,
   },
   centerContainer: {
