@@ -1,40 +1,38 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Camera,
+  Check,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock,
+  FileText,
+  Globe,
+  MapPin,
+  Music2,
+  Palette as PaletteIcon,
+  ShieldCheck,
+  User,
+  Users,
+  X,
+} from 'lucide-react-native';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
-  useColorScheme,
+  useColorScheme
 } from 'react-native';
-import { Image } from 'expo-image';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import {
-  Calendar,
-  Clock,
-  Globe,
-  MapPin,
-  User,
-  FileText,
-  CheckCircle2,
-  AlertCircle,
-  X,
-  Camera,
-  Building2,
-  ClipboardCheck,
-  Palette as PaletteIcon,
-  ShieldCheck,
-  Music2,
-  Users,
-  ArrowLeft,
-  Check,
-} from 'lucide-react-native';
 
 import { fetchBookings } from '@/api/bookings';
 import { getBookingMeta } from '@/constants/booking-meta';
@@ -233,443 +231,441 @@ export default function BookingDetailScreen() {
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: palette.background }]}
       edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView
+      <KeyboardAwareScrollView
         style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag">
-          <View style={styles.innerContent}>
-            {/* Hero Card with Banner Image & Details */}
-            <View
-              style={[
-                styles.heroCard,
-                {
-                  backgroundColor: palette.surface,
-                  borderColor: palette.border,
-                },
-                Elevation.card,
-              ]}>
-              <View style={styles.heroBannerContainer}>
-                <Image
-                  source={{ uri: meta.imageUrl }}
-                  style={styles.heroBannerImage}
-                  contentFit="cover"
-                  transition={200}
-                />
-                <View style={styles.heroBannerOverlay} />
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        bottomOffset={24}
+      >
+        <View style={styles.innerContent}>
+          {/* Hero Card with Banner Image & Details */}
+          <View
+            style={[
+              styles.heroCard,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.border,
+              },
+              Elevation.card,
+            ]}>
+            <View style={styles.heroBannerContainer}>
+              <Image
+                source={{ uri: meta.imageUrl }}
+                style={styles.heroBannerImage}
+                contentFit="cover"
+                transition={200}
+              />
+              <View style={styles.heroBannerOverlay} />
 
-                {/* Category Pill Floating */}
-                <View style={styles.heroCategoryPill}>
-                  {getCategoryIcon(booking.id, booking.title, '#FFFFFF', 13)}
-                  <Text style={styles.heroCategoryText}>{meta.category}</Text>
-                </View>
-
-                {/* ID Tag Floating */}
-                <View style={styles.heroIdPill}>
-                  <Text style={styles.heroIdText}>ID: #{booking.id}</Text>
-                </View>
+              {/* Category Pill Floating */}
+              <View style={styles.heroCategoryPill}>
+                {getCategoryIcon(booking.id, booking.title, '#FFFFFF', 13)}
+                <Text style={styles.heroCategoryText}>{meta.category}</Text>
               </View>
 
-              <View style={styles.heroBody}>
-                <View style={styles.titleStatusRow}>
-                  <Text style={[styles.bookingTitle, { color: palette.text }]}>
-                    {booking.title}
-                  </Text>
-                  <View
-                    style={[
-                      styles.statusChip,
-                      {
-                        backgroundColor: isCheckedIn
-                          ? palette.accentLight
-                          : checkInEnabled
-                            ? palette.surfaceVariant
-                            : palette.surfaceVariant,
-                        borderColor: isCheckedIn ? palette.accent : palette.border,
-                      },
-                    ]}>
-                    {isCheckedIn ? (
-                      <View style={styles.badgeRow}>
-                        <CheckCircle2 size={12} color={palette.accent} />
-                        <Text style={[styles.statusChipText, { color: palette.accent }]}>
-                          Confirmed
-                        </Text>
-                      </View>
-                    ) : (
-                      <Text
-                        style={[
-                          styles.statusChipText,
-                          {
-                            color: checkInEnabled
-                              ? palette.accent
-                              : palette.textSecondary,
-                          },
-                        ]}>
-                        {checkInEnabled ? '• Check-in Open' : '• Scheduled'}
+              {/* ID Tag Floating */}
+              <View style={styles.heroIdPill}>
+                <Text style={styles.heroIdText}>ID: #{booking.id}</Text>
+              </View>
+            </View>
+
+            <View style={styles.heroBody}>
+              <View style={styles.titleStatusRow}>
+                <Text style={[styles.bookingTitle, { color: palette.text }]}>
+                  {booking.title}
+                </Text>
+                <View
+                  style={[
+                    styles.statusChip,
+                    {
+                      backgroundColor: isCheckedIn
+                        ? palette.accentLight
+                        : checkInEnabled
+                          ? palette.surfaceVariant
+                          : palette.surfaceVariant,
+                      borderColor: isCheckedIn ? palette.accent : palette.border,
+                    },
+                  ]}>
+                  {isCheckedIn ? (
+                    <View style={styles.badgeRow}>
+                      <CheckCircle2 size={12} color={palette.accent} />
+                      <Text style={[styles.statusChipText, { color: palette.accent }]}>
+                        Confirmed
                       </Text>
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            {/* Location & Host Information Card */}
-            <View
-              style={[
-                styles.detailCard,
-                {
-                  backgroundColor: palette.surface,
-                  borderColor: palette.border,
-                },
-                Elevation.card,
-              ]}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={[styles.sectionHeading, { color: palette.text }]}>
-                  Location & Host
-                </Text>
-              </View>
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <MapPin size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    Venue & Address
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.text }]}>
-                  {meta.location}
-                </Text>
-              </View>
-
-              <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <User size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    Organizer / Host
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.text }]}>
-                  {meta.host}
-                </Text>
-              </View>
-
-              <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <FileText size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    Instructions
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.textSecondary, fontSize: 13, lineHeight: 18 }]}>
-                  {meta.instructions}
-                </Text>
-              </View>
-            </View>
-
-            {/* Schedule & Timezone Information Card */}
-            <View
-              style={[
-                styles.detailCard,
-                {
-                  backgroundColor: palette.surface,
-                  borderColor: palette.border,
-                },
-                Elevation.card,
-              ]}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={[styles.sectionHeading, { color: palette.text }]}>
-                  Schedule & Timezone
-                </Text>
-              </View>
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <Calendar size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    Calendar Date
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.text }]}>
-                  {formattedDate}
-                </Text>
-              </View>
-
-              <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <Clock size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    Local Time
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.text }]}>
-                  {formattedTime}
-                </Text>
-              </View>
-
-              <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <Globe size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    IANA Timezone
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.text }]}>
-                  {booking.timezone}
-                </Text>
-              </View>
-
-              <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
-
-              <View style={styles.detailRow}>
-                <View style={styles.detailLabelRow}>
-                  <Clock size={16} color={palette.textSecondary} />
-                  <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
-                    Duration
-                  </Text>
-                </View>
-                <Text style={[styles.detailValue, { color: palette.text }]}>
-                  {meta.duration}
-                </Text>
-              </View>
-            </View>
-
-            {/* Check-in Action Card */}
-            <View
-              style={[
-                styles.detailCard,
-                {
-                  backgroundColor: palette.surface,
-                  borderColor: isCheckedIn ? palette.accent : palette.border,
-                },
-                Elevation.card,
-              ]}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={[styles.sectionHeading, { color: palette.text }]}>
-                  Check-in
-                </Text>
-                {isCheckedIn && (
-                  <View
-                    style={[
-                      styles.badgeConfirmed,
-                      { backgroundColor: palette.accentLight },
-                    ]}>
-                    <CheckCircle2 size={13} color={palette.accent} />
-                    <Text style={[styles.badgeConfirmedText, { color: palette.accent }]}>
-                      Verified
+                    </View>
+                  ) : (
+                    <Text
+                      style={[
+                        styles.statusChipText,
+                        {
+                          color: checkInEnabled
+                            ? palette.accent
+                            : palette.textSecondary,
+                        },
+                      ]}>
+                      {checkInEnabled ? '• Check-in Open' : '• Scheduled'}
                     </Text>
-                  </View>
-                )}
-              </View>
-
-              <Pressable
-                disabled={!checkInEnabled || isCheckedIn}
-                style={({ pressed }) => [
-                  styles.checkInButton,
-                  {
-                    backgroundColor: isCheckedIn
-                      ? palette.accent
-                      : checkInEnabled
-                        ? palette.primary
-                        : palette.surfaceVariant,
-                    borderColor: isCheckedIn
-                      ? palette.accent
-                      : checkInEnabled
-                        ? palette.primary
-                        : palette.border,
-                  },
-                  pressed && checkInEnabled && !isCheckedIn && styles.buttonPressed,
-                ]}
-                onPress={handleCheckIn}
-                accessibilityRole="button"
-                accessibilityLabel="Check in"
-                accessibilityState={{ disabled: !checkInEnabled || isCheckedIn }}>
-                <View style={styles.badgeRow}>
-                  {isCheckedIn ? <Check size={16} color="#FFFFFF" /> : null}
-                  <Text
-                    style={[
-                      styles.checkInButtonText,
-                      {
-                        color: isCheckedIn
-                          ? '#FFFFFF'
-                          : checkInEnabled
-                            ? palette.primaryText
-                            : palette.textTertiary,
-                      },
-                    ]}>
-                    {isCheckedIn ? 'Checked in' : 'Check in'}
-                  </Text>
+                  )}
                 </View>
-              </Pressable>
+              </View>
+            </View>
+          </View>
 
+          {/* Location & Host Information Card */}
+          <View
+            style={[
+              styles.detailCard,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.border,
+              },
+              Elevation.card,
+            ]}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={[styles.sectionHeading, { color: palette.text }]}>
+                Location & Host
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <MapPin size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  Venue & Address
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.text }]}>
+                {meta.location}
+              </Text>
+            </View>
+
+            <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <User size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  Organizer / Host
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.text }]}>
+                {meta.host}
+              </Text>
+            </View>
+
+            <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <FileText size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  Instructions
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.textSecondary, fontSize: 13, lineHeight: 18 }]}>
+                {meta.instructions}
+              </Text>
+            </View>
+          </View>
+
+          {/* Schedule & Timezone Information Card */}
+          <View
+            style={[
+              styles.detailCard,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.border,
+              },
+              Elevation.card,
+            ]}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={[styles.sectionHeading, { color: palette.text }]}>
+                Schedule & Timezone
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <Calendar size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  Calendar Date
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.text }]}>
+                {formattedDate}
+              </Text>
+            </View>
+
+            <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <Clock size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  Local Time
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.text }]}>
+                {formattedTime}
+              </Text>
+            </View>
+
+            <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <Globe size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  IANA Timezone
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.text }]}>
+                {booking.timezone}
+              </Text>
+            </View>
+
+            <View style={[styles.rowDivider, { backgroundColor: palette.border }]} />
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelRow}>
+                <Clock size={16} color={palette.textSecondary} />
+                <Text style={[styles.detailLabel, { color: palette.textSecondary }]}>
+                  Duration
+                </Text>
+              </View>
+              <Text style={[styles.detailValue, { color: palette.text }]}>
+                {meta.duration}
+              </Text>
+            </View>
+          </View>
+
+          {/* Check-in Action Card */}
+          <View
+            style={[
+              styles.detailCard,
+              {
+                backgroundColor: palette.surface,
+                borderColor: isCheckedIn ? palette.accent : palette.border,
+              },
+              Elevation.card,
+            ]}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={[styles.sectionHeading, { color: palette.text }]}>
+                Check-in
+              </Text>
               {isCheckedIn && (
                 <View
                   style={[
-                    styles.confirmationCard,
+                    styles.badgeConfirmed,
                     { backgroundColor: palette.accentLight },
                   ]}>
-                  <View style={styles.confirmHeaderRow}>
-                    <CheckCircle2 size={16} color={palette.accent} />
-                    <Text style={[styles.confirmationText, { color: palette.accentText }]}>
-                      You have successfully checked in for this booking.
-                    </Text>
-                  </View>
-                  {checkedInAt && (
-                    <Text style={[styles.confirmationSubtext, { color: palette.accentText }]}>
-                      Check-in recorded at {new Date(checkedInAt).toLocaleTimeString()}
-                    </Text>
-                  )}
-                </View>
-              )}
-
-              {!checkInEnabled && !isCheckedIn && (
-                <View style={styles.hintRow}>
-                  <Clock size={14} color={palette.textSecondary} />
-                  <Text style={[styles.hintText, { color: palette.textSecondary }]}>
-                    Check-in opens 15 minutes before the start time.
+                  <CheckCircle2 size={13} color={palette.accent} />
+                  <Text style={[styles.badgeConfirmedText, { color: palette.accent }]}>
+                    Verified
                   </Text>
                 </View>
               )}
             </View>
 
-            {/* Note Persistence Card */}
-            <View
-              style={[
-                styles.detailCard,
+            <Pressable
+              disabled={!checkInEnabled || isCheckedIn}
+              style={({ pressed }) => [
+                styles.checkInButton,
                 {
-                  backgroundColor: palette.surface,
-                  borderColor: palette.border,
-                },
-                Elevation.card,
-              ]}>
-              <View style={styles.noteHeaderRow}>
-                <Text style={[styles.sectionHeading, { color: palette.text }]}>
-                  Note
-                </Text>
-                <View style={[styles.charCountBadge, { backgroundColor: palette.surfaceVariant }]}>
-                  <Text
-                    style={[
-                      styles.charCountText,
-                      {
-                        color:
-                          note.length > 140 ? palette.errorText : palette.textSecondary,
-                      },
-                    ]}>
-                    {note.length}/140
-                  </Text>
-                </View>
-              </View>
-
-              <View
-                style={[
-                  styles.noteInputWrapper,
-                  {
-                    backgroundColor: palette.surface,
-                    borderColor: isNoteFocused
-                      ? palette.borderFocused
+                  backgroundColor: isCheckedIn
+                    ? palette.accent
+                    : checkInEnabled
+                      ? palette.primary
+                      : palette.surfaceVariant,
+                  borderColor: isCheckedIn
+                    ? palette.accent
+                    : checkInEnabled
+                      ? palette.primary
                       : palette.border,
-                  },
-                ]}>
-                <TextInput
-                  style={[styles.noteInput, { color: palette.text }]}
-                  placeholder="Add your note here..."
-                  placeholderTextColor={palette.textTertiary}
-                  value={note}
-                  onChangeText={(val) => {
-                    setNote(val);
-                    if (noteFeedback) {
-                      setNoteFeedback(null);
-                    }
-                  }}
-                  onFocus={() => setIsNoteFocused(true)}
-                  onBlur={() => setIsNoteFocused(false)}
-                  multiline
-                  numberOfLines={4}
-                  maxLength={200}
-                  textAlignVertical="top"
-                  accessibilityLabel="Note"
-                />
-
-                {note.length > 0 && (
-                  <View style={styles.noteInputFooter}>
-                    <Pressable
-                      style={styles.clearNoteButton}
-                      onPress={handleClearNote}
-                      hitSlop={6}
-                      accessibilityRole="button"
-                      accessibilityLabel="Clear note">
-                      <X size={12} color={palette.textSecondary} />
-                      <Text style={[styles.clearNoteButtonText, { color: palette.textSecondary }]}>
-                        Clear
-                      </Text>
-                    </Pressable>
-                  </View>
-                )}
-              </View>
-
-              {/* Feedback Banner */}
-              {noteFeedback && (
-                <View
+                },
+                pressed && checkInEnabled && !isCheckedIn && styles.buttonPressed,
+              ]}
+              onPress={handleCheckIn}
+              accessibilityRole="button"
+              accessibilityLabel="Check in"
+              accessibilityState={{ disabled: !checkInEnabled || isCheckedIn }}>
+              <View style={styles.badgeRow}>
+                {isCheckedIn ? <Check size={16} color="#FFFFFF" /> : null}
+                <Text
                   style={[
-                    styles.feedbackBanner,
+                    styles.checkInButtonText,
                     {
-                      backgroundColor:
-                        noteFeedback.type === 'error'
-                          ? palette.errorLight
-                          : palette.accentLight,
+                      color: isCheckedIn
+                        ? '#FFFFFF'
+                        : checkInEnabled
+                          ? palette.primaryText
+                          : palette.textTertiary,
                     },
                   ]}>
-                  {noteFeedback.type === 'error' ? (
-                    <AlertCircle size={16} color={palette.errorText} />
-                  ) : (
-                    <CheckCircle2 size={16} color={palette.accent} />
-                  )}
-                  <Text
-                    style={[
-                      styles.feedbackText,
-                      {
-                        color:
-                          noteFeedback.type === 'error'
-                            ? palette.errorText
-                            : palette.accentText,
-                      },
-                    ]}>
-                    {noteFeedback.message}
+                  {isCheckedIn ? 'Checked in' : 'Check in'}
+                </Text>
+              </View>
+            </Pressable>
+
+            {isCheckedIn && (
+              <View
+                style={[
+                  styles.confirmationCard,
+                  { backgroundColor: palette.accentLight },
+                ]}>
+                <View style={styles.confirmHeaderRow}>
+                  <CheckCircle2 size={16} color={palette.accent} />
+                  <Text style={[styles.confirmationText, { color: palette.accentText }]}>
+                    You have successfully checked in for this booking.
                   </Text>
                 </View>
-              )}
-
-              <Pressable
-                disabled={savingNote}
-                style={({ pressed }) => [
-                  styles.saveNoteButton,
-                  { backgroundColor: palette.primary },
-                  pressed && styles.buttonPressed,
-                ]}
-                onPress={handleSaveNote}
-                accessibilityRole="button"
-                accessibilityLabel="Save note">
-                {savingNote ? (
-                  <ActivityIndicator size="small" color={palette.primaryText} />
-                ) : (
-                  <Text style={[styles.saveNoteButtonText, { color: palette.primaryText }]}>
-                    Save note
+                {checkedInAt && (
+                  <Text style={[styles.confirmationSubtext, { color: palette.accentText }]}>
+                    Check-in recorded at {new Date(checkedInAt).toLocaleTimeString()}
                   </Text>
                 )}
-              </Pressable>
-            </View>
+              </View>
+            )}
+
+            {!checkInEnabled && !isCheckedIn && (
+              <View style={styles.hintRow}>
+                <Clock size={14} color={palette.textSecondary} />
+                <Text style={[styles.hintText, { color: palette.textSecondary }]}>
+                  Check-in opens 15 minutes before the start time.
+                </Text>
+              </View>
+            )}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          {/* Note Persistence Card */}
+          <View
+            style={[
+              styles.detailCard,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.border,
+              },
+              Elevation.card,
+            ]}>
+            <View style={styles.noteHeaderRow}>
+              <Text style={[styles.sectionHeading, { color: palette.text }]}>
+                Note
+              </Text>
+              <View style={[styles.charCountBadge, { backgroundColor: palette.surfaceVariant }]}>
+                <Text
+                  style={[
+                    styles.charCountText,
+                    {
+                      color:
+                        note.length > 140 ? palette.errorText : palette.textSecondary,
+                    },
+                  ]}>
+                  {note.length}/140
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.noteInputWrapper,
+                {
+                  backgroundColor: palette.surface,
+                  borderColor: isNoteFocused
+                    ? palette.borderFocused
+                    : palette.border,
+                },
+              ]}>
+              <TextInput
+                style={[styles.noteInput, { color: palette.text }]}
+                placeholder="Add your note here..."
+                placeholderTextColor={palette.textTertiary}
+                value={note}
+                onChangeText={(val) => {
+                  setNote(val);
+                  if (noteFeedback) {
+                    setNoteFeedback(null);
+                  }
+                }}
+                onFocus={() => setIsNoteFocused(true)}
+                onBlur={() => setIsNoteFocused(false)}
+                multiline
+                numberOfLines={4}
+                maxLength={200}
+                textAlignVertical="top"
+                accessibilityLabel="Note"
+              />
+
+              {note.length > 0 && (
+                <View style={styles.noteInputFooter}>
+                  <Pressable
+                    style={styles.clearNoteButton}
+                    onPress={handleClearNote}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear note">
+                    <X size={12} color={palette.textSecondary} />
+                    <Text style={[styles.clearNoteButtonText, { color: palette.textSecondary }]}>
+                      Clear
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+
+            {/* Feedback Banner */}
+            {noteFeedback && (
+              <View
+                style={[
+                  styles.feedbackBanner,
+                  {
+                    backgroundColor:
+                      noteFeedback.type === 'error'
+                        ? palette.errorLight
+                        : palette.accentLight,
+                  },
+                ]}>
+                {noteFeedback.type === 'error' ? (
+                  <AlertCircle size={16} color={palette.errorText} />
+                ) : (
+                  <CheckCircle2 size={16} color={palette.accent} />
+                )}
+                <Text
+                  style={[
+                    styles.feedbackText,
+                    {
+                      color:
+                        noteFeedback.type === 'error'
+                          ? palette.errorText
+                          : palette.accentText,
+                    },
+                  ]}>
+                  {noteFeedback.message}
+                </Text>
+              </View>
+            )}
+
+            <Pressable
+              disabled={savingNote}
+              style={({ pressed }) => [
+                styles.saveNoteButton,
+                { backgroundColor: palette.primary },
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={handleSaveNote}
+              accessibilityRole="button"
+              accessibilityLabel="Save note">
+              {savingNote ? (
+                <ActivityIndicator size="small" color={palette.primaryText} />
+              ) : (
+                <Text style={[styles.saveNoteButtonText, { color: palette.primaryText }]}>
+                  Save note
+                </Text>
+              )}
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
